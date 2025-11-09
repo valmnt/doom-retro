@@ -19,6 +19,7 @@ async fn main() {
     let app = App::new();
     loop {
         app.draw_map();
+        app.draw_player();
         next_frame().await
     }
 }
@@ -43,6 +44,12 @@ struct App {
     map_height: usize,
     map: [u8; 10 * 10],
     tile_size: f32,
+    player: Player,
+}
+
+struct Player {
+    pos: Vec2,
+    _angle: f32,
 }
 
 impl App {
@@ -52,6 +59,10 @@ impl App {
             map_height: 10,
             map: MAP,
             tile_size: 64.0,
+            player: Player {
+                pos: vec2(2.0 * 64.0, 1.0 * 64.0),
+                _angle: 0.0,
+            },
         }
     }
 
@@ -68,5 +79,9 @@ impl App {
                 }
             }
         }
+    }
+
+    pub fn draw_player(&self) {
+        draw_circle(self.player.pos.x, self.player.pos.y, 10.0, DARKBLUE);
     }
 }
