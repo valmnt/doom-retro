@@ -16,10 +16,11 @@ const MAP: [u8; 10 * 10] = [
 
 #[macroquad::main(conf)]
 async fn main() {
-    let app = App::new();
+    let mut app = App::new();
     loop {
         app.draw_map();
         app.draw_player();
+        app.player.handle_key(get_frame_time());
         next_frame().await
     }
 }
@@ -47,11 +48,6 @@ struct App {
     player: Player,
 }
 
-struct Player {
-    pos: Vec2,
-    _angle: f32,
-}
-
 impl App {
     pub fn new() -> Self {
         Self {
@@ -61,7 +57,7 @@ impl App {
             tile_size: 64.0,
             player: Player {
                 pos: vec2(2.0 * 64.0, 1.0 * 64.0),
-                _angle: 0.0,
+                angle: 0.0,
             },
         }
     }
@@ -83,5 +79,36 @@ impl App {
 
     pub fn draw_player(&self) {
         draw_circle(self.player.pos.x, self.player.pos.y, 10.0, DARKBLUE);
+    }
+}
+
+struct Player {
+    pos: Vec2,
+    angle: f32,
+}
+
+impl Player {
+    pub fn handle_key(&mut self, dt: f32) {
+        const MOVE_SPEED: f32 = 2.0;
+        const ROT_SPEED: f32 = 1.5;
+
+        let dir = vec2(self.angle.cos(), self.angle.sin());
+
+        if is_key_down(KeyCode::Left) {
+            self.angle -= ROT_SPEED * dt;
+        }
+        if is_key_down(KeyCode::Right) {
+            self.angle += ROT_SPEED * dt;
+        }
+
+        let mut delta = Vec2::ZERO;
+        if is_key_down(KeyCode::Up) {
+            delta += dir;
+        }
+        if is_key_down(KeyCode::Down) {
+            delta -= dir;
+        }
+
+        self.pos += MOVE_SPEED * delta;
     }
 }
