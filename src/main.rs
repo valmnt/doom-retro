@@ -1,16 +1,44 @@
-use macroquad::prelude::*;
+use macroquad::{
+    miniquad::{conf::Platform, native::macos},
+    prelude::*,
+};
 
-#[macroquad::main("BasicShapes")]
+const WIDTH_SCREEN: i32 = 640;
+const HEIGHT_SCREEN: i32 = 480;
+
+const MAP_WIDTH: usize = 10;
+const MAP_HEIGHT: usize = 10;
+
+#[rustfmt::skip]
+const _MAP: [u8; MAP_WIDTH * MAP_HEIGHT] = [
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    1, 0, 1, 1, 1, 0, 1, 1, 0, 1,
+    1, 0, 1, 0, 1, 0, 1, 0, 0, 1,
+    1, 0, 1, 0, 1, 0, 1, 0, 1, 1,
+    1, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+    1, 1, 1, 0, 1, 1, 1, 1, 0, 1,
+    1, 0, 0, 0, 0, 0, 0, 1, 0, 1,
+    1, 0, 1, 1, 1, 1, 0, 0, 0, 1,
+    1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+];
+
+#[macroquad::main(conf)]
 async fn main() {
     loop {
-        clear_background(RED);
-
-        draw_line(40.0, 40.0, 100.0, 200.0, 15.0, BLUE);
-        draw_rectangle(screen_width() / 2.0 - 60.0, 100.0, 120.0, 60.0, GREEN);
-        draw_circle(screen_width() - 30.0, screen_height() - 30.0, 15.0, YELLOW);
-
-        draw_text("IT WORKS!", 20.0, 20.0, 30.0, DARKGRAY);
-
         next_frame().await
+    }
+}
+
+fn conf() -> Conf {
+    Conf {
+        window_width: WIDTH_SCREEN,
+        window_title: "Doom Retro writting in Rust".to_string(),
+        window_height: HEIGHT_SCREEN,
+        high_dpi: true,
+        fullscreen: false,
+        sample_count: 1,
+        window_resizable: false,
+        ..Default::default()
     }
 }
