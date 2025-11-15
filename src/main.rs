@@ -18,8 +18,8 @@ async fn main() {
 
 fn conf() -> Conf {
     let title = "Doom Retro writting in Rust".to_string();
-    let width_screen: i32 = 640;
-    let height_screen: i32 = 640;
+    let width_screen: i32 = 1280;
+    let height_screen: i32 = 720;
 
     Conf {
         window_title: title,

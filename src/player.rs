@@ -32,6 +32,8 @@ impl Player {
             delta = delta.normalize() * MOVE_SPEED * dt;
             self.try_move(delta);
         }
+
+        self.fiel_of_view(); 
     }
 
     fn try_move(&mut self, delta: Vec2) {
@@ -47,4 +49,26 @@ impl Player {
             self.pos.y = next.y;
         }
     }
+
+    fn fiel_of_view(&self) {
+        let mut c: f32 = 0.0;
+
+        while c < 150.0 {
+            let x = self.pos.x + c * self.angle.cos();
+            let y = self.pos.y + c * self.angle.sin();
+
+            let xf32 = x as f32;
+            let yf32 = y as f32;
+
+            if c > 20.0 {
+                draw_circle(xf32, yf32, 5.0, PINK);
+            }
+
+            if is_wall(vec2(xf32, yf32)) {
+                break;
+            }
+
+            c += 0.05;
+        }
+    } 
 }
