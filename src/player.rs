@@ -1,4 +1,5 @@
 use crate::map::is_wall;
+use std::f32::consts::PI;
 use macroquad::prelude::*;
 
 pub struct Player {
@@ -33,7 +34,7 @@ impl Player {
             self.try_move(delta);
         }
 
-        self.fiel_of_view(); 
+        self.fiel_of_view(dir); 
     }
 
     fn try_move(&mut self, delta: Vec2) {
@@ -50,25 +51,35 @@ impl Player {
         }
     }
 
-    fn fiel_of_view(&self) {
-        let mut c: f32 = 0.0;
+    fn fiel_of_view(&self, dir: Vec2) {
+        const FOV: f32 = PI/3.0;
 
-        while c < 150.0 {
-            let x = self.pos.x + c * self.angle.cos();
-            let y = self.pos.y + c * self.angle.sin();
+        let mut i: f32 = 0.0;
+        let dir_angle = dir.y.atan2(dir.x);
 
-            let xf32 = x as f32;
-            let yf32 = y as f32;
+        while i < 10.0 {
+            let mut c: f32 = 0.0;
+            let angle = dir_angle - FOV / 2.0 + FOV * (i/10.0);
 
-            if c > 20.0 {
-                draw_circle(xf32, yf32, 5.0, PINK);
+            while c < 150.0 {
+                let x = self.pos.x + c * angle.cos();
+                let y = self.pos.y + c * angle.sin();
+
+                let xf32 = x as f32;
+                let yf32 = y as f32;
+
+                if c > 20.0 {
+                    draw_circle(xf32, yf32, 5.0, PINK);
+                }
+
+                if is_wall(vec2(xf32, yf32)) {
+                    break;
+                }
+
+                c += 0.5;
             }
 
-            if is_wall(vec2(xf32, yf32)) {
-                break;
-            }
-
-            c += 0.05;
+            i += 0.5;
         }
     } 
 }
