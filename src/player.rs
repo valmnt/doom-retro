@@ -89,6 +89,11 @@ impl Player {
         let screen_h = 720.0;
 
         let view_w = screen_w / 2.0;
+
+        draw_rectangle(view_w, 0.0, view_w, screen_h / 2.0, BLACK);
+
+        draw_rectangle(view_w, screen_h / 2.0, view_w, screen_h / 2.0, DARKBROWN);
+
         for ray_i in 0..view_w as i32 {
             let angle = self.angle - fov / 2.0 + fov * (ray_i as f32) / view_w;
 
