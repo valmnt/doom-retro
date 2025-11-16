@@ -93,17 +93,18 @@ impl Player {
             let angle = self.angle - fov / 2.0 + fov * (ray_i as f32) / view_w;
 
             let mut t = 0.0;
-            while t < 150.0 {
+            while t < 500.0 {
                  let cx = self.pos.x + t * angle.cos();
                  let cy = self.pos.y + t * angle.sin();
 
                  if is_wall(vec2(cx, cy)) {
 
+                     const PROJ_SCALE: f32 = 20.0;
                      let distance = t.max(0.0001);
                      let angle_diff = angle - self.angle;
                      let distance_corrected = distance * angle_diff.cos().abs();
 
-                     let column_height = screen_h / distance_corrected;
+                     let column_height = (screen_h * PROJ_SCALE) / distance_corrected;
 
                      let col_x = view_w + ray_i as f32;
                      let col_y = screen_h / 2.0 - column_height / 2.0;
