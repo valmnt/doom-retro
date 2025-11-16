@@ -1,6 +1,7 @@
-use crate::map::is_wall;
-use std::f32::consts::PI;
+use crate::map::{self, MAP, MAP_WIDTH, TILE_SIZE, WALL_TEX_SIZE, is_wall};
 use macroquad::prelude::*;
+use macroquad::texture::DrawTextureParams;
+use std::f32::consts::PI;
 
 pub struct Player {
     pub pos: Vec2,
@@ -34,7 +35,7 @@ impl Player {
             self.try_move(delta);
         }
 
-        self.fiel_of_view(dir); 
+        self.fiel_of_view(dir);
     }
 
     fn try_move(&mut self, delta: Vec2) {
@@ -52,14 +53,14 @@ impl Player {
     }
 
     fn fiel_of_view(&self, dir: Vec2) {
-        const FOV: f32 = PI/3.0;
+        const FOV: f32 = PI / 3.0;
 
         let mut i: f32 = 0.0;
         let dir_angle = dir.y.atan2(dir.x);
 
         while i < 10.0 {
             let mut c: f32 = 0.0;
-            let angle = dir_angle - FOV / 2.0 + FOV * (i/10.0);
+            let angle = dir_angle - FOV / 2.0 + FOV * (i / 10.0);
 
             while c < 150.0 {
                 let x = self.pos.x + c * angle.cos();
@@ -81,35 +82,72 @@ impl Player {
 
             i += 0.5;
         }
-    } 
+    }
 
-    pub fn draw_3d(&self, fov: f32) {
+    pub fn draw_3d(&self, fov: f32, wall_texture: &Texture2D) {
         let screen_w = 1280.0;
         let screen_h = 720.0;
 
         let view_w = screen_w / 2.0;
-
         for ray_i in 0..view_w as i32 {
             let angle = self.angle - fov / 2.0 + fov * (ray_i as f32) / view_w;
 
             let mut t = 0.0;
             while t < 500.0 {
-                 let cx = self.pos.x + t * angle.cos();
-                 let cy = self.pos.y + t * angle.sin();
+                let cx = self.pos.x + t * angle.cos();
+                let cy = self.pos.y + t * angle.sin();
 
-                 if is_wall(vec2(cx, cy)) {
+                if is_wall(vec2(cx, cy)) {
+                    const PROJ_SCALE: f32 = 20.0;
 
-                     const PROJ_SCALE: f32 = 20.0;
-                     let distance = t.max(0.0001);
-                     let angle_diff = angle - self.angle;
-                     let distance_corrected = distance * angle_diff.cos().abs();
+                    let distance = t.max(0.0001);
+                    let angle_diff = angle - self.angle;
+                    let distance_corrected = distance * angle_diff.cos().abs();
 
-                     let column_height = (screen_h * PROJ_SCALE) / distance_corrected;
+                    let column_height = (screen_h * PROJ_SCALE) / distance_corrected;
 
-                     let col_x = view_w + ray_i as f32;
-                     let col_y = screen_h / 2.0 - column_height / 2.0;
+                    let col_x = view_w + ray_i as f32;
+                    let col_y = screen_h / 2.0 - column_height / 2.0;
 
-                    draw_rectangle(col_x, col_y, 1.0, column_height, PINK);
+                    let wx = cx / TILE_SIZE;
+                    let wy = cy / TILE_SIZE;
+
+                    let hitx = wx - (wx + 0.5).floor();
+                    let hity = wy - (wy + 0.5).floor();
+
+                    let mut tex_u = hitx;
+                    if hity.abs() > hitx.abs() {
+                        tex_u = hity;
+                    }
+
+                    if tex_u < 0.0 {
+                        tex_u += 1.0;
+                    }
+
+                    let tex_width = wall_texture.width();
+                    let tex_height = wall_texture.height();
+
+                    let x_texcoord = tex_u * tex_width;
+                    let src = Rect {
+                        x: x_texcoord,
+                        y: 0.0,
+                        w: 1.0,
+                        h: tex_height,
+                    };
+
+                    let dest_size = vec2(1.0, column_height);
+
+                    draw_texture_ex(
+                        wall_texture,
+                        col_x,
+                        col_y,
+                        WHITE,
+                        DrawTextureParams {
+                            source: Some(src),
+                            dest_size: Some(dest_size),
+                            ..Default::default()
+                        },
+                    );
 
                     break;
                 }

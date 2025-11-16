@@ -18,13 +18,16 @@ pub const MAP_WIDTH: usize = 10;
 pub const MAP_HEIGHT: usize = 10;
 pub const TILE_SIZE: f32 = 64.0;
 
+pub const WALL_TEX_SIZE: f32 = 64.0;
+pub const WALL_TEX_COUNT: usize = 4;
+
 pub fn is_wall(pos: Vec2) -> bool {
     tile_at(pos)
         .map(|(x, y)| MAP[y * MAP_WIDTH + x] == 1)
         .unwrap_or(true)
 }
 
-fn tile_at(pos: Vec2) -> Option<(usize, usize)> {
+pub fn tile_at(pos: Vec2) -> Option<(usize, usize)> {
     if pos.x < 0.0 || pos.y < 0.0 {
         return None;
     }
