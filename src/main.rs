@@ -3,15 +3,18 @@ mod map;
 mod player;
 
 use game::Game;
+use std::f32::consts::PI;
 use macroquad::prelude::*;
 
 #[macroquad::main(conf)]
 async fn main() {
     let mut game = Game::new();
     loop {
+        clear_background(BLACK);
         game.draw_map();
         game.draw_player();
         game.player.handle_key(get_frame_time());
+        game.player.draw_3d(PI / 3.0);
         next_frame().await
     }
 }

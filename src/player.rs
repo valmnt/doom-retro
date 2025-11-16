@@ -82,4 +82,39 @@ impl Player {
             i += 0.5;
         }
     } 
+
+    pub fn draw_3d(&self, fov: f32) {
+        let screen_w = 1280.0;
+        let screen_h = 720.0;
+
+        let view_w = screen_w / 2.0;
+
+        for ray_i in 0..view_w as i32 {
+            let angle = self.angle - fov / 2.0 + fov * (ray_i as f32) / view_w;
+
+            let mut t = 0.0;
+            while t < 150.0 {
+                 let cx = self.pos.x + t * angle.cos();
+                 let cy = self.pos.y + t * angle.sin();
+
+                 if is_wall(vec2(cx, cy)) {
+
+                     let distance = t.max(0.0001);
+                     let angle_diff = angle - self.angle;
+                     let distance_corrected = distance * angle_diff.cos().abs();
+
+                     let column_height = screen_h / distance_corrected;
+
+                     let col_x = view_w + ray_i as f32;
+                     let col_y = screen_h / 2.0 - column_height / 2.0;
+
+                    draw_rectangle(col_x, col_y, 1.0, column_height, PINK);
+
+                    break;
+                }
+
+                t += 0.5;
+            }
+        }
+    }
 }
