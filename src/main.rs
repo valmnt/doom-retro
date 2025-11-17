@@ -1,3 +1,4 @@
+mod engine;
 mod game;
 mod map;
 mod player;
@@ -6,8 +7,14 @@ use game::Game;
 use macroquad::prelude::*;
 use std::f32::consts::PI;
 
+use crate::{
+    engine::Engine,
+    map::{MAP, MAP_HEIGHT, MAP_WIDTH, TILE_SIZE},
+};
+
 #[macroquad::main(conf)]
 async fn main() {
+    let engine = Engine::new(MAP_WIDTH, MAP_HEIGHT, TILE_SIZE, MAP.to_vec());
     let mut game = Game::new();
 
     let wall_texture = load_texture("assets/wall.png").await.unwrap();
@@ -15,10 +22,10 @@ async fn main() {
 
     loop {
         clear_background(BLACK);
-        game.draw_map();
-        game.draw_player();
-        game.player.handle_key(get_frame_time());
-        game.player.draw_3d(PI / 3.0, &wall_texture);
+        game.player.handle_key(&engine, get_frame_time());
+        engine.draw_map();
+        engine.draw_player(game.player.pos);
+        engine.draw_3d(game.player.pos, game.player.angle, PI / 3.0, &wall_texture);
         next_frame().await
     }
 }
