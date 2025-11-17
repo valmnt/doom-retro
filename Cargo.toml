@@ -1,7 +1,11 @@
 [package]
-name = "doom-retro"
+name = "raycoon"
 version = "0.1.0"
 edition = "2024"
+
+[lib]
+name = "raycoon"
+path = "src/lib.rs"
 
 [dependencies]
 macroquad = "0.4.14"
