@@ -1,7 +1,7 @@
 use macroquad::prelude::*;
 use std::f32::consts::PI;
 
-use raycast_engine::Engine;
+use raycoon::Engine;
 
 #[macroquad::main(conf)]
 async fn main() {
