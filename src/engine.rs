@@ -1,48 +1,62 @@
 use macroquad::prelude::*;
-use std::f32::consts::PI;
+use std::collections::HashSet;
 
-struct Map {
-    tiles: Vec<u8>,
-    width: usize,
-    height: usize,
-    tile_size: f32,
+pub struct Tiles {
+    pub content: Vec<u8>,
+    pub blocking: HashSet<u8>,
+    pub size: f32,
+}
+
+pub struct Map {
+    pub tiles: Tiles,
+    pub width: usize,
+    pub height: usize,
 }
 
 pub struct Engine {
-    map: Map,
+    pub map: Map,
+}
+
+pub struct RayColumn {
+    pub dest_pos: Vec2,
+    pub dest_size: Vec2,
+    pub tex_source: Rect,
+}
+
+pub struct CastResult {
+    pub screen_size: Vec2,
+    pub columns: Vec<RayColumn>,
 }
 
 impl Engine {
-    pub fn new(map_width: usize, map_height: usize, tile_size: f32, tiles: Vec<u8>) -> Self {
+    pub fn new(map: Map) -> Self {
         assert!(
-            tiles.len() == map_width * map_height,
+            map.tiles.content.len() == map.width * map.height,
             "Invalid tiles length: got {}, expected {} (width * height)",
-            tiles.len(),
-            map_width * map_height,
+            map.tiles.content.len(),
+            map.width * map.height,
         );
 
-        Self {
-            map: Map {
-                tiles,
-                width: map_width,
-                height: map_height,
-                tile_size,
-            },
-        }
+        Self { map }
     }
 
-    fn is_wall(&self, pos: Vec2) -> bool {
-        self.tile_at(pos)
-            .map(|(x, y)| self.map.tiles[y * self.map.width + x] == 1)
+    fn hit_tile(&self, pos: Vec2) -> bool {
+        self.pixel_to_tile(pos)
+            .map(|(x, y)| {
+                self.map
+                    .tiles
+                    .blocking
+                    .contains(&self.map.tiles.content[y * self.map.width + x])
+            })
             .unwrap_or(true)
     }
 
-    fn tile_at(&self, pos: Vec2) -> Option<(usize, usize)> {
+    fn pixel_to_tile(&self, pos: Vec2) -> Option<(usize, usize)> {
         if pos.x < 0.0 || pos.y < 0.0 {
             return None;
         }
-        let x = (pos.x / self.map.tile_size) as usize;
-        let y = (pos.y / self.map.tile_size) as usize;
+        let x = (pos.x / self.map.tiles.size) as usize;
+        let y = (pos.y / self.map.tiles.size) as usize;
         if x < self.map.width && y < self.map.height {
             Some((x, y))
         } else {
@@ -50,96 +64,41 @@ impl Engine {
         }
     }
 
-    pub fn draw_map(&self) {
-        for y in 0..self.map.height {
-            for x in 0..self.map.width {
-                let tile = self.map.tiles[y * self.map.width + x];
-                let is_wall = tile == 1;
-                if is_wall {
-                    let xf32 = x as f32;
-                    let yf32 = y as f32;
-                    let pos = vec2(xf32 * self.map.tile_size, yf32 * self.map.tile_size);
-                    draw_rectangle(
-                        pos.x,
-                        pos.y,
-                        self.map.tile_size,
-                        self.map.tile_size,
-                        DARKGRAY,
-                    );
-                }
-            }
-        }
-    }
-
-    pub fn draw_player(&self, pos: Vec2) {
-        draw_circle(pos.x, pos.y, 10.0, DARKBLUE);
-    }
-
-    pub fn try_move(&self, pos: &mut Vec2, delta: Vec2) {
+    pub fn move_with_collision(&self, pos: &mut Vec2, delta: Vec2) {
         let next = *pos + delta;
 
         let test_x = vec2(next.x, pos.y);
-        if !self.is_wall(test_x) {
+        if !self.hit_tile(test_x) {
             pos.x = next.x;
         }
 
         let test_y = vec2(pos.x, next.y);
-        if !self.is_wall(test_y) {
+        if !self.hit_tile(test_y) {
             pos.y = next.y;
         }
     }
 
-    pub fn fiel_of_view(&self, pos: Vec2, dir: Vec2) {
-        const FOV: f32 = PI / 3.0;
+    pub fn cast_ray(
+        &self,
+        pos: Vec2,
+        angle_parent: f32,
+        fov: f32,
+        screen_size: Vec2,
+        wall_texture: &Texture2D,
+    ) -> CastResult {
+        let screen_w = screen_size.x;
+        let screen_h = screen_size.y;
+        let mut columns = Vec::with_capacity(screen_w as usize);
 
-        let mut i: f32 = 0.0;
-        let dir_angle = dir.y.atan2(dir.x);
-
-        while i < 10.0 {
-            let mut c: f32 = 0.0;
-            let angle = dir_angle - FOV / 2.0 + FOV * (i / 10.0);
-
-            while c < 150.0 {
-                let x = pos.x + c * angle.cos();
-                let y = pos.y + c * angle.sin();
-
-                let xf32 = x as f32;
-                let yf32 = y as f32;
-
-                if c > 20.0 {
-                    draw_circle(xf32, yf32, 5.0, PINK);
-                }
-
-                if self.is_wall(vec2(xf32, yf32)) {
-                    break;
-                }
-
-                c += 0.5;
-            }
-
-            i += 0.5;
-        }
-    }
-
-    pub fn draw_3d(&self, pos: Vec2, angle_parent: f32, fov: f32, wall_texture: &Texture2D) {
-        let screen_w = 1280.0;
-        let screen_h = 720.0;
-
-        let view_w = screen_w / 2.0;
-
-        draw_rectangle(view_w, 0.0, view_w, screen_h / 2.0, BLACK);
-
-        draw_rectangle(view_w, screen_h / 2.0, view_w, screen_h / 2.0, DARKBROWN);
-
-        for ray_i in 0..view_w as i32 {
-            let angle = angle_parent - fov / 2.0 + fov * (ray_i as f32) / view_w;
+        for ray_i in 0..screen_w as i32 {
+            let angle = angle_parent - fov / 2.0 + fov * (ray_i as f32) / screen_w;
 
             let mut t = 0.0;
             while t < 500.0 {
                 let cx = pos.x + t * angle.cos();
                 let cy = pos.y + t * angle.sin();
 
-                if self.is_wall(vec2(cx, cy)) {
+                if self.hit_tile(vec2(cx, cy)) {
                     const PROJ_SCALE: f32 = 20.0;
 
                     let distance = t.max(0.0001);
@@ -148,11 +107,11 @@ impl Engine {
 
                     let column_height = (screen_h * PROJ_SCALE) / distance_corrected;
 
-                    let col_x = view_w + ray_i as f32;
+                    let col_x = ray_i as f32;
                     let col_y = screen_h / 2.0 - column_height / 2.0;
 
-                    let wx = cx / self.map.tile_size;
-                    let wy = cy / self.map.tile_size;
+                    let wx = cx / self.map.tiles.size;
+                    let wy = cy / self.map.tiles.size;
 
                     let hitx = wx - (wx + 0.5).floor();
                     let hity = wy - (wy + 0.5).floor();
@@ -179,23 +138,23 @@ impl Engine {
 
                     let dest_size = vec2(1.0, column_height);
 
-                    draw_texture_ex(
-                        wall_texture,
-                        col_x,
-                        col_y,
-                        WHITE,
-                        DrawTextureParams {
-                            source: Some(src),
-                            dest_size: Some(dest_size),
-                            ..Default::default()
-                        },
-                    );
+                    let column = RayColumn {
+                        dest_pos: vec2(col_x, col_y),
+                        dest_size,
+                        tex_source: src,
+                    };
+                    columns.push(column);
 
                     break;
                 }
 
                 t += 0.5;
             }
+        }
+
+        CastResult {
+            screen_size,
+            columns,
         }
     }
 }
