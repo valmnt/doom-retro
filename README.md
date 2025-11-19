@@ -1,9 +1,8 @@
 <pre>
-888d888 8888b.  .d8888b .d88b.  .d88b. 88888b.  
-888P"      "88bd88P"   d88""88bd88""88b888 "88b 
-888    .d888888888     888  888888  888888  888 
-888    888  888Y88b.   Y88..88PY88..88P888  888 
-888    "Y888888 "Y8888P "Y88P"  "Y88P" 888  888 
+88""Yb    db    Yb  dP  dP""b8  dP"Yb   dP"Yb  88b 88 
+88__dP   dPYb    YbdP  dP   `" dP   Yb dP   Yb 88Yb88 
+88"Yb   dP__Yb    8P   Yb      Yb   dP Yb   dP 88 Y88 
+88  Yb dP""""Yb  dP     YboodP  YbodP   YbodP  88  Y8
 </pre>
 
 <br />
