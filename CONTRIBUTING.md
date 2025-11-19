@@ -4,8 +4,6 @@ Thank you for your interest in contributing to **Raycoon**!
 This project aims to keep a clean, simple, and educational codebase.  
 Please read the following guidelines before submitting changes.
 
----
-
 ## 🧱 Project Philosophy
 
 Raycoon is built around a few core principles:
@@ -17,8 +15,6 @@ Raycoon is built around a few core principles:
 - **Safe, idiomatic Rust** whenever possible.
 
 If a change violates these principles, it will be discussed before merging.
-
----
 
 ## 🛠️ How to Contribute
 
@@ -56,8 +52,6 @@ Describe:
 
 Pull requests that include clear explanations are merged much faster.
 
----
-
 ## 🧼 Code Guidelines
 
 - Keep the engine **backend-agnostic** (no rendering, no input).
@@ -66,8 +60,6 @@ Pull requests that include clear explanations are merged much faster.
 - Keep the API **small and focused**.
 - Avoid over-engineering and unnecessary abstractions.
 - Add tests when relevant (raycasting, collisions, map logic).
-
----
 
 ## 🧾 Commit Messages
 
@@ -78,8 +70,6 @@ Use clear, conventional commits:
 - fix(collision): correct per-axis movement
 - docs: update README
 
----
-
 ## 💬 Discussions & Issues
 
 Before implementing large or breaking changes:
@@ -89,12 +79,8 @@ Before implementing large or breaking changes:
 
 We value discussion before implementation.
 
----
-
 ## 📜 License
 
 By contributing to Raycoon, you agree that your contributions will be licensed under the **MIT License**, the same license used by the project.
-
----
 
 Thank you again for helping improve Raycoon! 🦝
