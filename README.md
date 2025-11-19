@@ -1,4 +1,4 @@
-<pre style="font-family: monospace; font-size: 12px; line-height: 1; color: orange;">
+<pre>
 888d888 8888b.  .d8888b .d88b.  .d88b. 88888b.  
 888P"      "88bd88P"   d88""88bd88""88b888 "88b 
 888    .d888888888     888  888888  888888  888 
