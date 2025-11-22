@@ -17,15 +17,15 @@ pub struct Engine {
     pub map: Map,
 }
 
-pub struct RayColumn {
-    pub pos: Vec2,
-    pub size: Vec2,
-    pub src: Rect,
+pub struct RayHit {
+    pub x: f32,
+    pub y: f32,
+    pub dist: f32,
+    pub index: i32,
 }
 
 pub struct CastResult {
-    pub screen: Vec2,
-    pub columns: Vec<RayColumn>,
+    pub hits: Vec<RayHit>,
 }
 
 impl Engine {
@@ -83,16 +83,13 @@ impl Engine {
         pos: Vec2,
         ang: f32,
         fov: f32,
-        scale: f32,
         limit: f32,
         raystep: f32,
         screen: Vec2,
-        texture: &Texture2D,
     ) -> CastResult {
         let screen_w = screen.x;
-        let screen_h = screen.y;
         
-        let mut columns = Vec::with_capacity(screen_w as usize);
+        let mut hits = Vec::with_capacity(screen_w as usize);
 
         for ray_i in 0..screen_w as i32 {
             let ray_angle = ang - fov / 2.0 + fov * (ray_i as f32) / screen_w;
@@ -108,42 +105,18 @@ impl Engine {
                     let distance = current_distance.max(0.0001);
                     let distance_corrected = distance * angle_diff.cos().abs();
 
-                    let column_height = (screen_h * scale) / distance_corrected;
-
-                    let column_x = ray_i as f32;
-                    let column_y = screen_h / 2.0 - column_height / 2.0;
-
                     let tile_x = current_dist_x / self.map.tiles.size;
                     let tile_y = current_dist_y / self.map.tiles.size;
 
                     let hit_x = tile_x - (tile_x + 0.5).floor();
                     let hit_y = tile_y - (tile_y + 0.5).floor();
 
-                    let mut texture_u = hit_x;
-                    if hit_y.abs() > hit_x.abs() {
-                        texture_u = hit_y;
-                    }
-
-                    if texture_u < 0.0 {
-                        texture_u += 1.0;
-                    }
-
-                    let texture_width = texture.width();
-                    let texture_height = texture.height();
-
-                    let texture_x = texture_u * texture_width;
-
-                    let column = RayColumn {
-                        pos: vec2(column_x, column_y),
-                        size: vec2(1.0, column_height),
-                        src:  Rect {
-                            x: texture_x,
-                            y: 0.0,
-                            w: 1.0,
-                            h: texture_height,
-                        },
-                    };
-                    columns.push(column);
+                    hits.push(RayHit {
+                        x: hit_x,
+                        y: hit_y,
+                        dist: distance_corrected,
+                        index: ray_i,
+                    });
 
                     break;
                 }
@@ -153,8 +126,7 @@ impl Engine {
         }
 
         CastResult {
-            screen,
-            columns,
+            hits,
         }
     }
 }

@@ -59,13 +59,11 @@ async fn main() {
             game.player.pos,
             game.player.angle,
             PI / 3.0,
-            20.0,
             500.0,
             0.8,
             screen_size,
-            &wall_texture,
         );
-        render.draw_scene(&cast_result, &wall_texture);
+        render.draw_scene(&cast_result, SCREEN_WIDTH, SCREEN_HEIGHT, 20.0, &wall_texture);
         next_frame().await
     }
 }
