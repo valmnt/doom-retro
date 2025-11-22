@@ -63,7 +63,7 @@ async fn main() {
             0.8,
             screen_size,
         );
-        render.draw_scene(&cast_result, SCREEN_WIDTH, SCREEN_HEIGHT, 20.0, &wall_texture);
+        render.draw_scene(&cast_result, screen_size, 20.0, &wall_texture);
         next_frame().await
     }
 }

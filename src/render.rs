@@ -1,16 +1,6 @@
 use macroquad::prelude::*;
 
-use crate::{engine::CastResult};
-
-pub struct RayColumn {
-    pub pos: Vec2,
-    pub size: Vec2,
-    pub src: Rect,
-}
-
-pub struct Columns {
-    pub rays: Vec<RayColumn>
-}
+use crate::engine::CastResult;
 
 pub struct Render {}
 
@@ -19,10 +9,11 @@ impl Render {
         Self {}
     }
 
-    pub fn draw_scene(&self, cast_result: &CastResult, screen_w: f32, screen_h: f32, scale: f32,  wall_texture: &Texture2D) {
-        let mut columns = Vec::new();
-        
-        for result in cast_result.hits.iter() {
+    pub fn draw_scene(&self, data: &CastResult, screen: Vec2, scale: f32, texture: &Texture2D) {
+        draw_rectangle(0.0, 0.0, screen.x, screen.y / 2.0, BLACK);
+        draw_rectangle(0.0, screen.y / 2.0, screen.x, screen.y / 2.0, DARKBROWN);
+
+        for result in data.hits.iter() {
             let mut texture_u = result.x;
             if result.y.abs() > result.x.abs() {
                 texture_u = result.y;
@@ -32,41 +23,32 @@ impl Render {
                 texture_u += 1.0;
             }
 
-            let texture_width = wall_texture.width();
-            let texture_height = wall_texture.height();
+            let texture_width = texture.width();
+            let texture_height = texture.height();
 
             let texture_x = texture_u * texture_width;
 
-            let column_height = (screen_h * scale) / result.dist;
-            let column_y = screen_h / 2.0 - column_height / 2.0;
+            let column_height = (screen.y * scale) / result.dist;
+            let column_y = screen.y / 2.0 - column_height / 2.0;
             let column_x = result.index as f32;
 
-            let column = RayColumn {
-                pos: vec2(column_x, column_y),
-                size: vec2(1.0, column_height),
-                src:  Rect {
-                    x: texture_x,
-                    y: 0.0,
-                    w: 1.0,
-                    h: texture_height,
-                },
+            let column_pos = vec2(column_x, column_y);
+            let column_size = vec2(1.0, column_height);
+            let column_src = Rect {
+                x: texture_x,
+                y: 0.0,
+                w: 1.0,
+                h: texture_height,
             };
 
-            columns.push(column);
-        }
-
-        draw_rectangle(0.0, 0.0, screen_w, screen_h / 2.0, BLACK);
-        draw_rectangle(0.0, screen_h / 2.0, screen_w, screen_h / 2.0, DARKBROWN);
-
-        for column in columns {
             draw_texture_ex(
-                wall_texture,
-                column.pos.x,
-                column.pos.y,
+                texture,
+                column_pos.x,
+                column_pos.y,
                 WHITE,
                 DrawTextureParams {
-                    source: Some(column.src),
-                    dest_size: Some(column.size),
+                    source: Some(column_src),
+                    dest_size: Some(column_size),
                     ..Default::default()
                 },
             );

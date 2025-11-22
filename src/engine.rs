@@ -88,7 +88,7 @@ impl Engine {
         screen: Vec2,
     ) -> CastResult {
         let screen_w = screen.x;
-        
+
         let mut hits = Vec::with_capacity(screen_w as usize);
 
         for ray_i in 0..screen_w as i32 {
@@ -125,8 +125,6 @@ impl Engine {
             }
         }
 
-        CastResult {
-            hits,
-        }
+        CastResult { hits }
     }
 }
