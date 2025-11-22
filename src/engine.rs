@@ -67,13 +67,13 @@ impl Engine {
     pub fn move_with_collision(&self, pos: &mut Vec2, delta: Vec2) {
         let next = *pos + delta;
 
-        let test_x = vec2(next.x, pos.y);
-        if !self.hit_tile(test_x) {
+        let x = vec2(next.x, pos.y);
+        if !self.hit_tile(x) {
             pos.x = next.x;
         }
 
-        let test_y = vec2(pos.x, next.y);
-        if !self.hit_tile(test_y) {
+        let y = vec2(pos.x, next.y);
+        if !self.hit_tile(y) {
             pos.y = next.y;
         }
     }
