@@ -59,6 +59,9 @@ async fn main() {
             game.player.pos,
             game.player.angle,
             PI / 3.0,
+            20.0,
+            500.0,
+            0.8,
             screen_size,
             &wall_texture,
         );

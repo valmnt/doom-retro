@@ -10,8 +10,8 @@ impl Render {
     }
 
     pub fn draw_scene(&self, cast_result: &CastResult, wall_texture: &Texture2D) {
-        let screen_w = cast_result.screen_size.x;
-        let screen_h = cast_result.screen_size.y;
+        let screen_w = cast_result.screen.x;
+        let screen_h = cast_result.screen.y;
 
         draw_rectangle(0.0, 0.0, screen_w, screen_h / 2.0, BLACK);
         draw_rectangle(0.0, screen_h / 2.0, screen_w, screen_h / 2.0, DARKBROWN);
@@ -19,12 +19,12 @@ impl Render {
         for column in &cast_result.columns {
             draw_texture_ex(
                 wall_texture,
-                column.dest_pos.x,
-                column.dest_pos.y,
+                column.pos.x,
+                column.pos.y,
                 WHITE,
                 DrawTextureParams {
-                    source: Some(column.tex_source),
-                    dest_size: Some(column.dest_size),
+                    source: Some(column.src),
+                    dest_size: Some(column.size),
                     ..Default::default()
                 },
             );

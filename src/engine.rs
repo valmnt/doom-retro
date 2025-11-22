@@ -18,13 +18,13 @@ pub struct Engine {
 }
 
 pub struct RayColumn {
-    pub dest_pos: Vec2,
-    pub dest_size: Vec2,
-    pub tex_source: Rect,
+    pub pos: Vec2,
+    pub size: Vec2,
+    pub src: Rect,
 }
 
 pub struct CastResult {
-    pub screen_size: Vec2,
+    pub screen: Vec2,
     pub columns: Vec<RayColumn>,
 }
 
@@ -81,79 +81,79 @@ impl Engine {
     pub fn cast_ray(
         &self,
         pos: Vec2,
-        angle_parent: f32,
+        ang: f32,
         fov: f32,
-        screen_size: Vec2,
-        wall_texture: &Texture2D,
+        scale: f32,
+        limit: f32,
+        raystep: f32,
+        screen: Vec2,
+        texture: &Texture2D,
     ) -> CastResult {
-        let screen_w = screen_size.x;
-        let screen_h = screen_size.y;
+        let screen_w = screen.x;
+        let screen_h = screen.y;
+        
         let mut columns = Vec::with_capacity(screen_w as usize);
 
         for ray_i in 0..screen_w as i32 {
-            let angle = angle_parent - fov / 2.0 + fov * (ray_i as f32) / screen_w;
+            let ray_angle = ang - fov / 2.0 + fov * (ray_i as f32) / screen_w;
 
-            let mut t = 0.0;
-            while t < 500.0 {
-                let cx = pos.x + t * angle.cos();
-                let cy = pos.y + t * angle.sin();
+            let mut current_distance = 0.0;
 
-                if self.hit_tile(vec2(cx, cy)) {
-                    const PROJ_SCALE: f32 = 20.0;
+            while current_distance < limit {
+                let current_dist_x = pos.x + current_distance * ray_angle.cos();
+                let current_dist_y = pos.y + current_distance * ray_angle.sin();
 
-                    let distance = t.max(0.0001);
-                    let angle_diff = angle - angle_parent;
+                if self.hit_tile(vec2(current_dist_x, current_dist_y)) {
+                    let angle_diff = ray_angle - ang;
+                    let distance = current_distance.max(0.0001);
                     let distance_corrected = distance * angle_diff.cos().abs();
 
-                    let column_height = (screen_h * PROJ_SCALE) / distance_corrected;
+                    let column_height = (screen_h * scale) / distance_corrected;
 
-                    let col_x = ray_i as f32;
-                    let col_y = screen_h / 2.0 - column_height / 2.0;
+                    let column_x = ray_i as f32;
+                    let column_y = screen_h / 2.0 - column_height / 2.0;
 
-                    let wx = cx / self.map.tiles.size;
-                    let wy = cy / self.map.tiles.size;
+                    let tile_x = current_dist_x / self.map.tiles.size;
+                    let tile_y = current_dist_y / self.map.tiles.size;
 
-                    let hitx = wx - (wx + 0.5).floor();
-                    let hity = wy - (wy + 0.5).floor();
+                    let hit_x = tile_x - (tile_x + 0.5).floor();
+                    let hit_y = tile_y - (tile_y + 0.5).floor();
 
-                    let mut tex_u = hitx;
-                    if hity.abs() > hitx.abs() {
-                        tex_u = hity;
+                    let mut texture_u = hit_x;
+                    if hit_y.abs() > hit_x.abs() {
+                        texture_u = hit_y;
                     }
 
-                    if tex_u < 0.0 {
-                        tex_u += 1.0;
+                    if texture_u < 0.0 {
+                        texture_u += 1.0;
                     }
 
-                    let tex_width = wall_texture.width();
-                    let tex_height = wall_texture.height();
+                    let texture_width = texture.width();
+                    let texture_height = texture.height();
 
-                    let x_texcoord = tex_u * tex_width;
-                    let src = Rect {
-                        x: x_texcoord,
-                        y: 0.0,
-                        w: 1.0,
-                        h: tex_height,
-                    };
-
-                    let dest_size = vec2(1.0, column_height);
+                    let texture_x = texture_u * texture_width;
 
                     let column = RayColumn {
-                        dest_pos: vec2(col_x, col_y),
-                        dest_size,
-                        tex_source: src,
+                        pos: vec2(column_x, column_y),
+                        size: vec2(1.0, column_height),
+                        src:  Rect {
+                            x: texture_x,
+                            y: 0.0,
+                            w: 1.0,
+                            h: texture_height,
+                        },
                     };
                     columns.push(column);
 
                     break;
                 }
 
-                t += 0.5;
+                current_distance += raystep;
             }
         }
 
         CastResult {
-            screen_size,
+            screen,
             columns,
         }
     }
